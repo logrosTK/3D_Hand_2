@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -87,6 +88,7 @@ static void Hand_SetFingers(const float fingers[HAND_SERVO_COUNT], uint32_t now_
 static void Hand_WriteServoUs(uint8_t servo_id, uint16_t pulse_us);
 static void Hand_ProcessLine(const char *line);
 static void Hand_UartWrite(const char *text);
+static void Hand_UartWriteStatus(void);
 static bool Hand_RxPop(uint8_t *out);
 static bool Hand_ParseUnitValue(const char **cursor, float *out);
 static float Hand_Clamp01(float value);
@@ -445,15 +447,23 @@ static void Hand_ProcessLine(const char *line)
     return;
   }
 
+  if (strcmp(line, "STATUS") == 0 || strcmp(line, "S") == 0)
+  {
+    Hand_UartWriteStatus();
+    return;
+  }
+
   if (line[0] == 'G' && line[1] == ',')
   {
     const char *cursor = line + 2;
     float grip = 0.0f;
-    if (Hand_ParseUnitValue(&cursor, &grip))
+    if (Hand_ParseUnitValue(&cursor, &grip) && *cursor == '\0')
     {
       Hand_SetGrip(grip, HAL_GetTick());
       Hand_UartWrite("OK,G\r\n");
+      return;
     }
+    Hand_UartWrite("ERR,G\r\n");
     return;
   }
 
@@ -476,14 +486,43 @@ static void Hand_ProcessLine(const char *line)
         cursor++;
       }
     }
+    if (*cursor != '\0')
+    {
+      Hand_UartWrite("ERR,F\r\n");
+      return;
+    }
     Hand_SetFingers(fingers, HAL_GetTick());
     Hand_UartWrite("OK,F\r\n");
+    return;
   }
+
+  Hand_UartWrite("ERR,UNKNOWN\r\n");
 }
 
 static void Hand_UartWrite(const char *text)
 {
   HAL_UART_Transmit(&huart1, (uint8_t *)text, (uint16_t)strlen(text), 50U);
+}
+
+static void Hand_UartWriteStatus(void)
+{
+  char text[96];
+  int len = snprintf(text, sizeof(text),
+                     "STATUS,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\r\n",
+                     (unsigned int)servo_current_us[0],
+                     (unsigned int)servo_current_us[1],
+                     (unsigned int)servo_current_us[2],
+                     (unsigned int)servo_current_us[3],
+                     (unsigned int)servo_current_us[4],
+                     (unsigned int)servo_target_us[0],
+                     (unsigned int)servo_target_us[1],
+                     (unsigned int)servo_target_us[2],
+                     (unsigned int)servo_target_us[3],
+                     (unsigned int)servo_target_us[4]);
+  if (len > 0 && len < (int)sizeof(text))
+  {
+    HAL_UART_Transmit(&huart1, (uint8_t *)text, (uint16_t)len, 50U);
+  }
 }
 
 static bool Hand_RxPop(uint8_t *out)
