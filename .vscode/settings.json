@@ -1,0 +1,7 @@
+{
+  "cmake.cmakePath": "D:\\Apps\\STM32CUBEIDE\\STM32CubeIDE_2.1.1\\STM32CubeIDE\\plugins\\com.st.stm32cube.ide.mcu.externaltools.cmake.win32_1.1.101.202603101401\\tools\\bin\\cmake.exe",
+  "cmake.useCMakePresets": "always",
+  "cmake.configureOnOpen": true,
+  "cortex-debug.armToolchainPath": "D:\\Apps\\GNU ARM\\bin",
+  "cortex-debug.openocdPath": "D:\\Apps\\OpenOCD-20260302-0.12.0\\bin\\openocd.exe"
+}
