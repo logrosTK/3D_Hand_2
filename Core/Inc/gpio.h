@@ -18,6 +18,7 @@
   */
 /* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
+/* 防止头文件重复包含 */
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
@@ -26,7 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "main.h"   // 包含HAL库和公共定义
 
 /* USER CODE BEGIN Includes */
 
@@ -36,7 +37,7 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void MX_GPIO_Init(void);
+void MX_GPIO_Init(void);   // GPIO初始化函数声明（定义在gpio.c中）
 
 /* USER CODE BEGIN Prototypes */
 

@@ -32,24 +32,29 @@
 
 
 /* Variables */
+// 弱符号声明的字符输入输出函数（可由用户重定义，如重定向到串口）
 extern int __io_putchar(int ch) __attribute__((weak));
 extern int __io_getchar(void) __attribute__((weak));
 
 
+// 环境变量（空，嵌入式系统通常不需要）
 char *__env[1] = { 0 };
 char **environ = __env;
 
 
 /* Functions */
+// 初始化监视器句柄（空实现，用于兼容调试器 semihosting）
 void initialise_monitor_handles()
 {
 }
 
+// 返回当前进程ID（嵌入式裸机固定返回1）
 int _getpid(void)
 {
   return 1;
 }
 
+// 发送信号给进程（嵌入式不支持，返回错误）
 int _kill(int pid, int sig)
 {
   (void)pid;
@@ -58,12 +63,14 @@ int _kill(int pid, int sig)
   return -1;
 }
 
+// 进程退出（调用_kill后死循环）
 void _exit (int status)
 {
   _kill(status, -1);
-  while (1) {}    /* Make sure we hang here */
+  while (1) {}    /* 确保停在这里 */
 }
 
+// 读取文件（弱符号，通过__io_getchar逐字节读取，可用于串口输入重定向）
 __attribute__((weak)) int _read(int file, char *ptr, int len)
 {
   (void)file;
@@ -77,6 +84,7 @@ __attribute__((weak)) int _read(int file, char *ptr, int len)
   return len;
 }
 
+// 写入文件（弱符号，通过__io_putchar逐字节输出，可用于串口输出重定向/printf重定向）
 __attribute__((weak)) int _write(int file, char *ptr, int len)
 {
   (void)file;
@@ -89,13 +97,14 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
   return len;
 }
 
+// 关闭文件（不支持，返回-1）
 int _close(int file)
 {
   (void)file;
   return -1;
 }
 
-
+// 获取文件状态（所有文件视为字符设备）
 int _fstat(int file, struct stat *st)
 {
   (void)file;
@@ -103,12 +112,14 @@ int _fstat(int file, struct stat *st)
   return 0;
 }
 
+// 判断文件描述符是否为终端（嵌入式固定返回1=是终端）
 int _isatty(int file)
 {
   (void)file;
   return 1;
 }
 
+// 文件寻址（不支持，返回0）
 int _lseek(int file, int ptr, int dir)
 {
   (void)file;
@@ -117,14 +128,15 @@ int _lseek(int file, int ptr, int dir)
   return 0;
 }
 
+// 打开文件（不支持，始终失败）
 int _open(char *path, int flags, ...)
 {
   (void)path;
   (void)flags;
-  /* Pretend like we always fail */
   return -1;
 }
 
+// 等待子进程（不支持）
 int _wait(int *status)
 {
   (void)status;
@@ -132,6 +144,7 @@ int _wait(int *status)
   return -1;
 }
 
+// 删除文件（不支持）
 int _unlink(char *name)
 {
   (void)name;
@@ -139,12 +152,14 @@ int _unlink(char *name)
   return -1;
 }
 
+// 获取进程时间（不支持）
 clock_t _times(struct tms *buf)
 {
   (void)buf;
   return -1;
 }
 
+// 获取文件信息（不支持）
 int _stat(const char *file, struct stat *st)
 {
   (void)file;

@@ -39,12 +39,17 @@
         * EVENT_OUT
         * EXTI
 */
+/**
+  * @brief  GPIO初始化（CubeMX生成）
+  * @note   仅使能GPIOC和GPIOD时钟（STM32F103C8Tx启动所需）
+  *         实际的PWM/串口GPIO在main.c的外设初始化函数中单独配置
+  */
 void MX_GPIO_Init(void)
 {
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();   // 使能GPIOC时钟
+  __HAL_RCC_GPIOD_CLK_ENABLE();   // 使能GPIOD时钟
 
 }
 

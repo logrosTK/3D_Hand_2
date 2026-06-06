@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "stm32f1xx_it.h"
+#include "main.h"       // HAL库和公共定义
+#include "stm32f1xx_it.h"  // 中断处理函数声明
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -57,15 +57,14 @@
 /* External variables --------------------------------------------------------*/
 
 /* USER CODE BEGIN EV */
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart1;   // 引用main.c中定义的USART1句柄（用于USART1_IRQHandler）
 
 /* USER CODE END EV */
 
-/******************************************************************************/
-/*           Cortex-M3 Processor Interruption and Exception Handlers          */
-/******************************************************************************/
+/** Cortex-M3 处理器异常和中断处理函数 */
+
 /**
-  * @brief This function handles Non maskable interrupt.
+  * @brief NMI不可屏蔽中断处理（发生严重硬件错误时触发，死循环等待调试器介入）
   */
 void NMI_Handler(void)
 {
@@ -80,7 +79,7 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
+  * @brief HardFault硬件错误中断处理（总线错误、内存访问违规等）
   */
 void HardFault_Handler(void)
 {
@@ -95,7 +94,7 @@ void HardFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Memory management fault.
+  * @brief MemManage内存管理错误中断（MPU违规访问）
   */
 void MemManage_Handler(void)
 {
@@ -110,7 +109,7 @@ void MemManage_Handler(void)
 }
 
 /**
-  * @brief This function handles Prefetch fault, memory access fault.
+  * @brief BusFault总线错误中断（预取指令错误、内存访问错误）
   */
 void BusFault_Handler(void)
 {
@@ -125,7 +124,7 @@ void BusFault_Handler(void)
 }
 
 /**
-  * @brief This function handles Undefined instruction or illegal state.
+  * @brief UsageFault未定义指令或非法状态中断
   */
 void UsageFault_Handler(void)
 {
@@ -140,7 +139,7 @@ void UsageFault_Handler(void)
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
+  * @brief SVC系统服务调用中断（通过SWI指令触发）
   */
 void SVC_Handler(void)
 {
@@ -153,7 +152,7 @@ void SVC_Handler(void)
 }
 
 /**
-  * @brief This function handles Debug monitor.
+  * @brief DebugMon调试监视器中断
   */
 void DebugMon_Handler(void)
 {
@@ -166,7 +165,7 @@ void DebugMon_Handler(void)
 }
 
 /**
-  * @brief This function handles Pendable request for system service.
+  * @brief PendSV可挂起系统服务中断（常用于RTOS上下文切换）
   */
 void PendSV_Handler(void)
 {
@@ -179,25 +178,26 @@ void PendSV_Handler(void)
 }
 
 /**
-  * @brief This function handles System tick timer.
+  * @brief SysTick系统滴答定时器中断（HAL库时基，默认1ms）
+  * @note  调用HAL_IncTick()递增HAL库的Tick计数器
   */
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
   /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
+  HAL_IncTick();   // HAL库Tick计数+1（每1ms）
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
-/* STM32F1xx Peripheral Interrupt Handlers                                    */
-/* Add here the Interrupt Handlers for the used peripherals.                  */
-/* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_stm32f1xx.s).                    */
+/* STM32F1xx 外设中断处理函数                                                  */
+/* 在此添加已使用外设的中断处理函数                                              */
+/* 可用的外设中断处理函数名称请参考启动文件（startup_stm32f1xx.s）               */
 /******************************************************************************/
+/* 注意：USART1_IRQHandler 由 HAL 库内部处理，实际回调为 HAL_UART_RxCpltCallback */
 
 /* USER CODE BEGIN 1 */
 /**

@@ -57,7 +57,8 @@
 
 /* USER CODE END 0 */
 /**
-  * Initializes the Global MSP.
+  * 初始化全局MSP（MCU Support Package）
+  * @note  HAL库初始化时调用，配置系统级外设时钟和调试接口
   */
 void HAL_MspInit(void)
 {
@@ -66,13 +67,12 @@ void HAL_MspInit(void)
 
   /* USER CODE END MspInit 0 */
 
-  __HAL_RCC_AFIO_CLK_ENABLE();
-  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_RCC_AFIO_CLK_ENABLE();   // 使能复用功能IO时钟（用于SWJ调试接口重映射）
+  __HAL_RCC_PWR_CLK_ENABLE();    // 使能电源控制时钟
 
   /* System interrupt init*/
 
-  /** DISABLE: JTAG-DP Disabled and SW-DP Disabled
-  */
+  /** 禁用JTAG-DP和SW-DP调试接口，释放PA13/PA14/PA15/PB3/PB4作为普通GPIO使用 */
   __HAL_AFIO_REMAP_SWJ_DISABLE();
 
   /* USER CODE BEGIN MspInit 1 */

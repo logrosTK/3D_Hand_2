@@ -26,62 +26,61 @@
 #include <stddef.h>
 
 /**
- * Pointer to the current high watermark of the heap usage
+ * 当前堆使用的高水位标记指针
+ * 堆从 _end（链接脚本中定义的BSS段末尾）开始向上增长
+ * MSP栈从 _estack 向下增长，两者之间需要保留 _Min_Stack_Size 的间距
  */
 static uint8_t *__sbrk_heap_end = NULL;
 
 /**
- * @brief _sbrk() allocates memory to the newlib heap and is used by malloc
- *        and others from the C library
+ * @brief _sbrk() 为 newlib 堆分配内存，被 malloc/free 等 C 库函数调用
  *
  * @verbatim
  * ############################################################################
  * #  .data  #  .bss  #       newlib heap       #          MSP stack          #
- * #         #        #                         # Reserved by _Min_Stack_Size #
+ * #         #        #                         #  由 _Min_Stack_Size 保留   #
  * ############################################################################
- * ^-- RAM start      ^-- _end                             _estack, RAM end --^
+ * ^-- RAM起始              ^-- _end                             _estack, RAM末尾 --^
  * @endverbatim
  *
- * This implementation starts allocating at the '_end' linker symbol
- * The '_Min_Stack_Size' linker symbol reserves a memory for the MSP stack
- * The implementation considers '_estack' linker symbol to be RAM end
- * NOTE: If the MSP stack, at any point during execution, grows larger than the
- * reserved size, please increase the '_Min_Stack_Size'.
+ * 分配从链接符号 '_end' 开始
+ * 链接符号 '_Min_Stack_Size' 为 MSP 栈保留内存空间
+ * 链接符号 '_estack' 为 RAM 末尾地址
+ * 注意：如果运行时 MSP 栈增长超过预留大小，请增大 '_Min_Stack_Size'
  *
- * @param incr Memory size
- * @return Pointer to allocated memory
+ * @param incr 请求分配的内存大小（字节）
+ * @return 分配的内存指针，失败返回 (void*)-1
  */
 void *_sbrk(ptrdiff_t incr)
 {
-  extern uint8_t _end; /* Symbol defined in the linker script */
-  extern uint8_t _estack; /* Symbol defined in the linker script */
-  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
-  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
-  const uint8_t *max_heap = (uint8_t *)stack_limit;
+  extern uint8_t _end;              /* 链接脚本中定义的符号：BSS段末尾 = 堆起始地址 */
+  extern uint8_t _estack;           /* 链接脚本中定义的符号：栈顶 = RAM末尾 */
+  extern uint32_t _Min_Stack_Size;  /* 链接脚本中定义的符号：最小栈空间（字节） */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;  // 栈底边界
+  const uint8_t *max_heap = (uint8_t *)stack_limit;   // 堆的最大允许地址
   uint8_t *prev_heap_end;
 
-  /* Initialize heap end at first call */
+  /* 首次调用时初始化堆起始地址 */
   if (NULL == __sbrk_heap_end)
   {
     __sbrk_heap_end = &_end;
   }
 
-  /* Protect heap from growing into the reserved MSP stack */
+  /* 防止堆增长侵入MSP栈保留空间 */
   if (__sbrk_heap_end + incr > max_heap)
   {
-    errno = ENOMEM;
-    return (void *)-1;
+    errno = ENOMEM;        // 内存不足
+    return (void *)-1;      // 返回失败
   }
 
   prev_heap_end = __sbrk_heap_end;
-  __sbrk_heap_end += incr;
+  __sbrk_heap_end += incr;  // 堆指针上移
 
   return (void *)prev_heap_end;
 }
 
 #if defined(__PICOLIBC__)
-  // Picolibc expects syscalls without the leading underscore.
-  // This creates a strong alias so that
-  // calls to `sbrk()` are resolved to our `_sbrk()` implementation.
+  // Picolibc 库期望 syscall 不带前导下划线
+  // 此处创建强别名，使 sbrk() 调用解析到 _sbrk() 实现
   __strong_reference(_sbrk, sbrk);
 #endif

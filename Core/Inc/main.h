@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
+/* 防止头文件重复包含 */
 #ifndef __MAIN_H
 #define __MAIN_H
 
@@ -27,7 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal.h"   // STM32F1 HAL库主头文件
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,7 +51,7 @@ extern "C" {
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void Error_Handler(void);   // HAL错误处理函数声明（定义在main.c中）
 
 /* USER CODE BEGIN EFP */
 
